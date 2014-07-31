@@ -102,7 +102,7 @@ class Ui_Form(object):
     def retranslateUi(self, Form):
         Form.setWindowTitle(_translate("Form", "Form", None))
         self.path_excel_label.setText(_translate("Form", "CSV File Path", None))
-        self.row_number_label.setText(_translate("Form", "Row Number", None))
+        self.row_number_label.setText(_translate("Form", "Column No.", None))
         self.email_id_label.setText(_translate("Form", "Email ID", None))
         self.password_label.setText(_translate("Form", "Password", None))
         self.subject_label.setText(_translate("Form", "Subject", None))
