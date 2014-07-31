@@ -12,7 +12,7 @@ These files need to be converted to CSV format.
 
 How to use:
 
-1. <code> python run_mailer.py </code>
+1. <code>python run_mailer.py</code>
 2. Select the .csv file which was created from the .xls / .xlsx file. 
 3. Enter the column number of the CSV / .xls / .xlsx file in which all email addresses are stored.
 4. Enter all other details as mentioned in the Ui.
