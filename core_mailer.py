@@ -1,0 +1,120 @@
+from PyQt4.QtGui import QDialog, QFileDialog
+from ui_mailer import Ui_Form
+from functools import partial
+
+import smtplib
+import os
+import csv
+from email.mime.image import MIMEImage
+from email.mime.multipart import MIMEMultipart
+from email.MIMEBase import MIMEBase
+from email.mime.text import MIMEText
+from email.utils import formatdate
+from email import Encoders
+
+class Mailer(QDialog, Ui_Form):
+    def __init__(self):
+        super(Mailer, self).__init__()
+        self.setupUi(self)
+        self.send_button.clicked.connect(self.on_send)
+        self.browse_button_excel.clicked.connect(self.on_browse_excel)
+        self.browse_button_mail.clicked.connect(self.on_browse_mail)
+        self.browse_button_attachment_1.clicked.connect(self.on_browse_attachment_1)
+        self.browse_button_attachment_2.clicked.connect(self.on_browse_attachment_2)
+    
+    def on_send(self):
+        '''
+        receipt_no = str(self.receipt_no_text.text())
+        name = str(self.name_text.text())
+        junior_senior = str(self.junior_senior_text.text())
+        college = str(self.college_text.text())
+        contact_no = str(self.contact_no_text.text())
+        email_address = str(self.email_address_text.text())
+        '''
+        
+        # Get filename - FILENAME
+        # Get row number of emails in CSV file - row_num
+        # Get email id and password - EMAIL_ID, PASSWORD
+        # Get subject text - SUBJECT_TEXT
+        # Get mail content - MAIL_CONTENT
+        
+        path_excel = str(self.path_excel_text.text())
+        row_number = int(str(self.row_number_text.text()))
+        EMAIL_ID = str(self.email_id_text.text())
+        PASSWORD = str(self.password_text.text())
+        SUBJECT_TEXT = str(self.subject_text.text())
+        path_mail = str(self.path_mail_text.text())
+        MAIL_CONTENT = 'initialized_value'
+        
+        attachments = []
+        
+
+        with open (path_mail, "r") as myfile:
+            MAIL_CONTENT = myfile.read()#.replace('\n', '')
+        
+        COMMASPACE = ', '
+
+        msg = MIMEMultipart()
+        msg['Subject'] = SUBJECT_TEXT
+        me = EMAIL_ID
+        recipients = []
+
+        with open(path_excel, 'rb') as f:
+            reader = csv.reader(f)
+            for row in reader:
+            	recipients.append(row[row_number])
+
+        text = MAIL_CONTENT
+
+        msg['From'] = me
+        msg['To'] = COMMASPACE.join(recipients)
+        msg['Date'] = formatdate(localtime=True)
+        #msg.preamble = 'Sending pics'
+        msg.attach( MIMEText(text) )
+        
+        if str(self.attachment_1_text.text()) != '':
+            attachments.append(str(self.attachment_1_text.text()))
+        
+        if str(self.attachment_2_text.text()) != '':
+            attachments.append(str(self.attachment_2_text.text()))
+                    
+        
+        print attachments
+           
+        for filename in attachments:
+            f = filename
+            part = MIMEBase('application', "octet-stream")
+            part.set_payload( open(f,"rb").read() )
+            Encoders.encode_base64(part)
+            part.add_header('Content-Disposition', 'attachment; filename="%s"' % os.path.basename(f))
+            msg.attach(part)
+        
+        
+        
+        # TO SEND IMAGES
+        #fp = open(PATH_TO_IMAGE, 'rb')
+        #img = MIMEImage(fp.read(),name=os.path.basename(PATH_TO_IMAGE))
+        #fp.close()
+        #msg.attach(img)
+
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.starttls()
+        server.login(EMAIL_ID, PASSWORD)
+        server.sendmail(me, recipients, msg.as_string())
+        server.quit()
+        
+        self.main_label.setStyleSheet('color: white; background-color: black')
+        
+        
+    
+    def on_browse_excel(self):
+        self.path_excel_text.setText(QFileDialog.getOpenFileName())
+    
+    def on_browse_mail(self):
+        self.path_mail_text.setText(QFileDialog.getOpenFileName())
+    
+    def on_browse_attachment_1(self):
+        self.attachment_1_text.setText(QFileDialog.getOpenFileName())
+    
+    def on_browse_attachment_2(self):
+        self.attachment_2_text.setText(QFileDialog.getOpenFileName())
