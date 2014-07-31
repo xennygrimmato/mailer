@@ -4,6 +4,7 @@ mailer
 A utility to send emails to multiple recipients simultaneously.
 
 <strong>Pre-requisites:</strong>
+
 1. This application assumes that you have the recipient email addresses saved in one column of a .xls / .xlsx file.
 These files need to be converted to CSV format.
 
