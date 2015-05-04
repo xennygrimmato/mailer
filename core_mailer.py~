@@ -63,7 +63,7 @@ class Mailer(QDialog, Ui_Form):
         with open(path_excel, 'rb') as f:
             reader = csv.reader(f)
             for row in reader:
-                recipients.append(row[row_number])
+            	recipients.append(row[row_number])
 
         text = MAIL_CONTENT
 
@@ -119,6 +119,6 @@ class Mailer(QDialog, Ui_Form):
     
     def on_browse_attachment_2(self):
         if str(self.attachment_1_text.text()) != '':
-            print str(self.attachment_1_text.text())
+        	print str(self.attachment_1_text.text())
             attachments.append(str(self.attachment_1_text.text()))
             self.attachment_1_text.setText('')

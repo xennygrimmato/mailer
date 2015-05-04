@@ -114,4 +114,4 @@ class Ui_Form(object):
         self.attachment_1_label.setText(_translate("Form", "Attachment", None))
         #self.attachment_2_label.setText(_translate("Form", "Attachment 2", None))
         self.browse_button_attachment_1.setText(_translate("Form", "Browse..", None))
-        self.browse_button_attachment_2.setText(_translate("Form", "Attach", None))
+        #self.browse_button_attachment_2.setText(_translate("Form", "Attach", None))
