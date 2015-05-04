@@ -1,4 +1,4 @@
-from PyQt4.QtGui import QDialog, QFileDialog
+from PyQt4.QtGui import QDialog, QFileDialog, QMessageBox, QPushButton
 from ui_mailer import Ui_Form
 from functools import partial
 
@@ -12,6 +12,8 @@ from email.mime.text import MIMEText
 from email.utils import formatdate
 from email import Encoders
 
+from math import ceil
+
 attachments = []
 
 class Mailer(QDialog, Ui_Form):
@@ -22,7 +24,7 @@ class Mailer(QDialog, Ui_Form):
         self.browse_button_excel.clicked.connect(self.on_browse_excel)
         self.browse_button_mail.clicked.connect(self.on_browse_mail)
         self.browse_button_attachment_1.clicked.connect(self.on_browse_attachment_1)
-        self.browse_button_attachment_2.clicked.connect(self.on_browse_attachment_2)
+        self.browse_button_attachment_2.clicked.connect(self.on_perform_attach)
     
     def on_send(self):
         '''
@@ -58,29 +60,20 @@ class Mailer(QDialog, Ui_Form):
         msg = MIMEMultipart()
         msg['Subject'] = SUBJECT_TEXT
         me = EMAIL_ID
-        recipients = []
+        total_recipients = []
 
         with open(path_excel, 'rb') as f:
             reader = csv.reader(f)
             for row in reader:
-                recipients.append(row[row_number])
-
+                total_recipients.append(row[row_number])
+        
         text = MAIL_CONTENT
-
         msg['From'] = me
-        msg['To'] = COMMASPACE.join(recipients)
         msg['Date'] = formatdate(localtime=True)
         #msg.preamble = 'Sending pics'
         msg.attach( MIMEText(text) )
         
-        if str(self.attachment_1_text.text()) != '':
-            attachments.append(str(self.attachment_1_text.text()))
-        
-        if str(self.attachment_2_text.text()) != '':
-            attachments.append(str(self.attachment_2_text.text()))
-                    
-        
-        print attachments
+        #print attachments
            
         for filename in attachments:
             f = filename
@@ -90,21 +83,32 @@ class Mailer(QDialog, Ui_Form):
             part.add_header('Content-Disposition', 'attachment; filename="%s"' % os.path.basename(f))
             msg.attach(part)
         
-        
-        
         # TO SEND IMAGES
         #fp = open(PATH_TO_IMAGE, 'rb')
         #img = MIMEImage(fp.read(),name=os.path.basename(PATH_TO_IMAGE))
         #fp.close()
         #msg.attach(img)
-
-        server = smtplib.SMTP('smtp.gmail.com', 587)
-        server.starttls()
-        server.login(EMAIL_ID, PASSWORD)
-        server.sendmail(me, recipients, msg.as_string())
-        server.quit()
         
-        self.main_label.setStyleSheet('color: white; background-color: black')
+        PARTS = int(ceil(len(total_recipients)/100.0))
+        print PARTS
+        for i in xrange(PARTS):
+            print '{0} parts remaining..'.format(PARTS-i)
+            recipients = total_recipients[i*100: min(len(total_recipients), (i+1)*100)]
+            msg['To'] = COMMASPACE.join(recipients)
+            server = smtplib.SMTP('smtp.gmail.com', 587)
+            server.starttls()
+            server.login(EMAIL_ID, PASSWORD)
+            server.sendmail(me, recipients, msg.as_string())
+            server.quit()
+            msgBox = QMessageBox()
+            msgBox.setText('Part {0}/{1} completed.'.format(i+1,PARTS))
+            msgBox.addButton(QPushButton('Ok'), QMessageBox.YesRole)
+            ret = msgBox.exec_();
+            
+        msgBox = QMessageBox()
+        msgBox.setText('Mailing completed.'.format(i))
+        msgBox.addButton(QPushButton('Ok'), QMessageBox.YesRole)
+        ret = msgBox.exec_();
         
         
     
@@ -117,7 +121,7 @@ class Mailer(QDialog, Ui_Form):
     def on_browse_attachment_1(self):
         self.attachment_1_text.setText(QFileDialog.getOpenFileName())
     
-    def on_browse_attachment_2(self):
+    def on_perform_attach(self):
         if str(self.attachment_1_text.text()) != '':
             print str(self.attachment_1_text.text())
             attachments.append(str(self.attachment_1_text.text()))
